@@ -8,39 +8,6 @@ import (
 	"github.com/marcioaso/consult/utils"
 )
 
-// type KLineRequestData struct {
-// 	T  int    `json:"t,omitempty"`
-// 	S  string `json:"s"`
-// 	SN string `json:"sn"`
-// 	C  string `json:"c"`
-// 	H  string `json:"h"`
-// 	L  string `json:"l"`
-// 	O  string `json:"o"`
-// 	V  string `json:"v"`
-// }
-
-type KLineData struct {
-	// Response
-	Timestamp      int     `json:"timestamp"`
-	Symbol         string  `json:"symbol"`
-	SymbolInternal string  `json:"symbol_internal"`
-	Volume         float64 `json:"volume"`
-	Open           float64 `json:"open"`
-	Close          float64 `json:"close"`
-	High           float64 `json:"high"`
-	Low            float64 `json:"low"`
-
-	// Request
-	T  int    `json:"t,omitempty"`
-	S  string `json:"s,omitempty"`
-	SN string `json:"sn,omitempty"`
-	C  string `json:"c,omitempty"`
-	H  string `json:"h,omitempty"`
-	L  string `json:"l,omitempty"`
-	O  string `json:"o,omitempty"`
-	V  string `json:"v,omitempty"`
-}
-
 func (c *KLineData) Convert() KLineData {
 	data := KLineData{
 		Timestamp:      c.T,
