@@ -49,17 +49,20 @@ type KLineSMAConfig struct {
 	Heavy int `json:"heavy"`
 }
 
-type KLineMeta struct {
-	Symbol string         `json:"symbol"`
-	SMAS   KLineSMAConfig `json:"smas"`
+type KLineParams struct {
+	Symbol   string `json:"symbol"`
+	Interval string `json:"interval"`
+	Limit    int    `json:"limit"`
+	To       string `json:"to"`
 }
 
-type KLineStats struct {
-	Count int `json:"count"`
+type KLineMeta struct {
+	SMAS        KLineSMAConfig `json:"sma_conf"`
+	Params      KLineParams    `json:"input"`
+	ResultCount int            `json:"result_count"`
 }
 
 type KLineResponse struct {
-	Meta  KLineMeta   `json:"meta"`
-	Stats KLineStats  `json:"stats"`
-	Data  []KLineData `json:"data"`
+	Meta KLineMeta   `json:"meta"`
+	Data []KLineData `json:"data"`
 }

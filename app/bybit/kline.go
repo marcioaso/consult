@@ -31,13 +31,13 @@ func (c *KLineData) Convert() KLineData {
 	return data
 }
 
-func GetKLine(ticker, interval, limit, to string) (*KLineResponse, error) {
+func GetKLine(ticker, interval, to string, limit int) (*KLineResponse, error) {
 	url := getUrl(
 		fmt.Sprintf(
-			"/spot/api/quote/v2/klines?symbol=%s&interval=%s&limit=%s&to=%s",
+			"/spot/api/quote/v2/klines?symbol=%s&interval=%s&limit=%v&to=%s",
 			ticker,
 			interval,
-			limit,
+			limit+1,
 			to,
 		),
 	)

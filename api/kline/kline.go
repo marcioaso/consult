@@ -3,6 +3,7 @@ package kline
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -27,14 +28,31 @@ func KlineHandler(c echo.Context) error {
 	if limit == "" {
 		limit = defaultLimit
 	}
+	numLimit, err := strconv.Atoi(limit)
+	if err != nil {
+		numLimit, _ = strconv.Atoi(defaultLimit)
+	}
+
 	to := c.QueryParam("to")
 	if to == "" {
 		to = defaultTo
 	}
+	numTo, err := strconv.Atoi(to)
+	if err != nil {
+		numTo, _ = strconv.Atoi(defaultTo)
+	}
+	readableTo := time.Unix(int64(numTo)/1000, 0).Format(time.RFC3339)
 
-	kline, err := bybit.GetKLine(ticker, interval, limit, to)
+	kline, err := bybit.GetKLine(ticker, interval, to, numLimit)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Error fetching data: %v", err))
+	}
+
+	kline.Meta.Params = bybit.KLineParams{
+		Symbol:   ticker,
+		Interval: interval,
+		Limit:    numLimit,
+		To:       readableTo,
 	}
 
 	return c.JSON(http.StatusOK, kline)

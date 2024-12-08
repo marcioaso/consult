@@ -122,16 +122,13 @@ func ParseKLineData(data []byte) (*KLineResponse, error) {
 				timeTick,
 			)
 
-		} else {
-			response.Meta.Symbol = tailKLineData[i].Symbol
 		}
 		tailKLineData[i].SMAS = smas
 	}
 
 	klineData := tailKLineData[2:periodsLimit]
-
-	response.Stats.Count = len(klineData)
 	response.Data = klineData
+	response.Meta.ResultCount = len(klineData)
 
 	return response, nil
 }
