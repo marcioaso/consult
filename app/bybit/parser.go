@@ -8,50 +8,7 @@ import (
 	"github.com/marcioaso/consult/pkg"
 )
 
-var periods = []int{25, 50, 100}
-
-type SMAItem struct {
-	Value         float64 `json:"value"`
-	Angle         float64 `json:"angle"`
-	PreviousAngle float64 `json:"previous_angle"`
-}
-
-type SMAData struct {
-	FAST  SMAItem `json:"fast"`
-	SLOW  SMAItem `json:"slow"`
-	HEAVY SMAItem `json:"heavy"`
-}
-
-type Directions struct {
-	Close string `json:"close"`
-	Fast  string `json:"fast_sma"`
-	Slow  string `json:"slow_sma"`
-	Heavy string `json:"heavy_sma"`
-}
-
-type KLineData struct {
-	T  int64  `json:"t,omitempty"`
-	V  string `json:"v,omitempty"`
-	O  string `json:"o,omitempty"`
-	C  string `json:"c,omitempty"`
-	H  string `json:"h,omitempty"`
-	L  string `json:"l,omitempty"`
-	S  string `json:"s,omitempty"`
-	SN string `json:"sn,omitempty"`
-
-	Datetime       string  `json:"datetime"`
-	Timestamp      int64   `json:"timestamp"`
-	Symbol         string  `json:"symbol"`
-	SymbolInternal string  `json:"symbol_internal"`
-	Volume         float64 `json:"volume"`
-	Close          float64 `json:"close"`
-	Open           float64 `json:"open"`
-	High           float64 `json:"high"`
-	Low            float64 `json:"low"`
-
-	SMAS       SMAData    `json:"sma"`
-	Directions Directions `json:"directions"`
-}
+var smaConf = []int{25, 50, 100}
 
 func (kl *KLineData) ToData() KLineData {
 	kd := KLineData{
@@ -80,10 +37,11 @@ func (kl *KLineData) ToData() KLineData {
 	return kd
 }
 
-func ParseKLineData(data []byte) ([]KLineData, error) {
+func ParseKLineData(data []byte) (*KLineResponse, error) {
 	serializer := struct {
 		Result []KLineData `json:"result"`
 	}{}
+
 	err := json.Unmarshal(data, &serializer)
 	if err != nil {
 		return nil, err
@@ -97,9 +55,9 @@ func ParseKLineData(data []byte) ([]KLineData, error) {
 		allCloses = append(allCloses, item.Close)
 	}
 
-	smas1, _ := pkg.CalculateSMA(allCloses, periods[0])
-	smas2, _ := pkg.CalculateSMA(allCloses, periods[1])
-	smas3, _ := pkg.CalculateSMA(allCloses, periods[2])
+	smas1, _ := pkg.CalculateSMA(allCloses, smaConf[0])
+	smas2, _ := pkg.CalculateSMA(allCloses, smaConf[1])
+	smas3, _ := pkg.CalculateSMA(allCloses, smaConf[2])
 
 	periodsLimit := len(smas3)
 	originalRawKLinedata := len(rawKlineData)
@@ -158,7 +116,18 @@ func ParseKLineData(data []byte) ([]KLineData, error) {
 		tailKLineData[i].SMAS = smas
 	}
 
-	return tailKLineData[2:periodsLimit], nil
+	response := &KLineResponse{
+		Definitions: KLineDefinitions{
+			SMAS: KLineSMAConfig{
+				Fast:  smaConf[0],
+				Slow:  smaConf[1],
+				Heavy: smaConf[2],
+			},
+		},
+		Data: tailKLineData[2:periodsLimit],
+	}
+
+	return response, nil
 }
 
 func enhanceSMAData(data *SMAItem, previous SMAItem, timeTick float64) string {

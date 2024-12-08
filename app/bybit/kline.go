@@ -1,7 +1,6 @@
 package bybit
 
 import (
-	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -32,7 +31,7 @@ func (c *KLineData) Convert() KLineData {
 	return data
 }
 
-func GetKLine(ticker, interval, limit, to string) ([]KLineData, error) {
+func GetKLine(ticker, interval, limit, to string) (*KLineResponse, error) {
 	url := getUrl(
 		fmt.Sprintf(
 			"/spot/api/quote/v2/klines?symbol=%s&interval=%s&limit=%s&to=%s",
@@ -43,24 +42,16 @@ func GetKLine(ticker, interval, limit, to string) ([]KLineData, error) {
 		),
 	)
 
-	requestData := struct {
-		Result []KLineData `json:"result"`
-	}{}
-
 	result, err := utils.Request(url, defaultHeaders)
 	if err != nil {
 		return nil, err
 	}
 
-	err = json.Unmarshal(result, &requestData)
+	response, err := ParseKLineData(result)
+
 	if err != nil {
 		return nil, err
 	}
 
-	response := make([]KLineData, 0)
-
-	for _, item := range requestData.Result {
-		response = append(response, item.Convert())
-	}
 	return response, nil
 }
