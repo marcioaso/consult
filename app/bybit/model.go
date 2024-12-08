@@ -49,11 +49,17 @@ type KLineSMAConfig struct {
 	Heavy int `json:"heavy"`
 }
 
-type KLineDefinitions struct {
-	SMAS KLineSMAConfig `json:"smas"`
+type KLineMeta struct {
+	Symbol string         `json:"symbol"`
+	SMAS   KLineSMAConfig `json:"smas"`
+}
+
+type KLineStats struct {
+	Count int `json:"count"`
 }
 
 type KLineResponse struct {
-	Definitions KLineDefinitions `json:"definitions"`
-	Data        []KLineData      `json:"data"`
+	Meta  KLineMeta   `json:"meta"`
+	Stats KLineStats  `json:"stats"`
+	Data  []KLineData `json:"data"`
 }

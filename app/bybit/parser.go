@@ -59,6 +59,16 @@ func ParseKLineData(data []byte) (*KLineResponse, error) {
 	smas2, _ := pkg.CalculateSMA(allCloses, smaConf[1])
 	smas3, _ := pkg.CalculateSMA(allCloses, smaConf[2])
 
+	response := &KLineResponse{
+		Meta: KLineMeta{
+			SMAS: KLineSMAConfig{
+				Fast:  smaConf[0],
+				Slow:  smaConf[1],
+				Heavy: smaConf[2],
+			},
+		},
+	}
+
 	periodsLimit := len(smas3)
 	originalRawKLinedata := len(rawKlineData)
 	originalSma1Len := len(smas1)
@@ -112,20 +122,16 @@ func ParseKLineData(data []byte) (*KLineResponse, error) {
 				timeTick,
 			)
 
+		} else {
+			response.Meta.Symbol = tailKLineData[i].Symbol
 		}
 		tailKLineData[i].SMAS = smas
 	}
 
-	response := &KLineResponse{
-		Definitions: KLineDefinitions{
-			SMAS: KLineSMAConfig{
-				Fast:  smaConf[0],
-				Slow:  smaConf[1],
-				Heavy: smaConf[2],
-			},
-		},
-		Data: tailKLineData[2:periodsLimit],
-	}
+	klineData := tailKLineData[2:periodsLimit]
+
+	response.Stats.Count = len(klineData)
+	response.Data = klineData
 
 	return response, nil
 }
