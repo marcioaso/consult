@@ -55,6 +55,10 @@ func KlineHandler(c echo.Context) error {
 		To:       readableTo,
 	}
 
+	if len(kline.Data) > 0 {
+		kline.Meta.Params.From = kline.Data[0].Datetime
+	}
+
 	return c.JSON(http.StatusOK, kline)
 
 }

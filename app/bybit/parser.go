@@ -2,6 +2,7 @@ package bybit
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -37,7 +38,10 @@ func (kl *KLineData) ToData() KLineData {
 	return kd
 }
 
+var invested = 100.00
+
 func ParseKLineData(data []byte) (*KLineResponse, error) {
+	var bought = 0.0
 	serializer := struct {
 		Result []KLineData `json:"result"`
 	}{}
@@ -66,6 +70,9 @@ func ParseKLineData(data []byte) (*KLineResponse, error) {
 				Slow:  smaConf[1],
 				Heavy: smaConf[2],
 			},
+		},
+		Resolutions: KLineResolutions{
+			Advices: make([]ActionRecomendation, 0),
 		},
 	}
 
@@ -121,14 +128,42 @@ func ParseKLineData(data []byte) (*KLineResponse, error) {
 				previous.SMAS.HEAVY,
 				timeTick,
 			)
+			recomendation := ActionRecomendation{
+				Datetime: current.Datetime,
+				Type:     "hold",
+				Candles:  i,
+				Close:    current.Close,
+			}
 
+			tailKLineData[i].Directions.Recomendation = recomendation
+			recomendationHistory := 10
+			if i > recomendationHistory {
+				recomendation = generateRecomendation(&recomendation, tailKLineData[i-recomendationHistory:i])
+
+				if recomendation.Type != "hold" && recomendation.Type != currentRecomendation.Type {
+					response.Resolutions.Advices = append(response.Resolutions.Advices, recomendation)
+
+					lastRecomendedKline = tailKLineData[i]
+					if recomendation.Type == "buy" {
+						bought = invested / recomendation.Close
+						invested = 0
+					} else if recomendation.Type == "sell" && bought > 0 {
+						amount := bought * recomendation.Close
+						fmt.Println("operation: ", amount)
+						invested = amount
+						bought = 0
+					}
+					currentRecomendation = recomendation
+				}
+			}
 		}
 		tailKLineData[i].SMAS = smas
 	}
 
 	klineData := tailKLineData[2:periodsLimit]
 	response.Data = klineData
-	response.Meta.ResultCount = len(klineData)
+	response.Resolutions.ResultCount = len(klineData)
+	fmt.Println("**** invested", invested)
 
 	return response, nil
 }
@@ -143,7 +178,7 @@ func enhanceSMAData(data *SMAItem, previous SMAItem, timeTick float64) string {
 	data.Angle = angle
 	data.PreviousAngle = previous.Angle
 
-	if angle > 0 && angle > previous.Angle {
+	if angle > 0 {
 		return "up"
 	}
 	return "down"

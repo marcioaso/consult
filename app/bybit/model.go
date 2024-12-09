@@ -12,11 +12,21 @@ type SMAData struct {
 	HEAVY SMAItem `json:"heavy"`
 }
 
+type ActionRecomendation struct {
+	Datetime  string  `json:"datetime"`
+	Type      string  `json:"type"`
+	Candles   int     `json:"candles"`
+	Certainty float64 `json:"certainty"`
+	Close     float64 `json:"close"`
+	Note      string  `json:"note"`
+}
+
 type Directions struct {
-	Close string `json:"close"`
-	Fast  string `json:"fast_sma"`
-	Slow  string `json:"slow_sma"`
-	Heavy string `json:"heavy_sma"`
+	Recomendation ActionRecomendation `json:"recomendation"`
+	Close         string              `json:"close"`
+	Fast          string              `json:"fast_sma"`
+	Slow          string              `json:"slow_sma"`
+	Heavy         string              `json:"heavy_sma"`
 }
 
 type KLineData struct {
@@ -54,15 +64,21 @@ type KLineParams struct {
 	Interval string `json:"interval"`
 	Limit    int    `json:"limit"`
 	To       string `json:"to"`
+	From     string `json:"from"`
+}
+
+type KLineResolutions struct {
+	ResultCount int                   `json:"results"`
+	Advices     []ActionRecomendation `json:"advices"`
 }
 
 type KLineMeta struct {
-	SMAS        KLineSMAConfig `json:"sma_conf"`
-	Params      KLineParams    `json:"input"`
-	ResultCount int            `json:"result_count"`
+	Params KLineParams    `json:"params"`
+	SMAS   KLineSMAConfig `json:"smas"`
 }
 
 type KLineResponse struct {
-	Meta KLineMeta   `json:"meta"`
-	Data []KLineData `json:"data"`
+	Meta        KLineMeta        `json:"meta"`
+	Resolutions KLineResolutions `json:"resolutions"`
+	Data        []KLineData      `json:"data"`
 }
