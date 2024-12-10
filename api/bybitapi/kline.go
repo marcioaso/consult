@@ -1,4 +1,4 @@
-package kline
+package bybitapi
 
 import (
 	"fmt"
@@ -8,6 +8,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/marcioaso/consult/app/bybit"
+	"github.com/marcioaso/consult/app/model"
 )
 
 func KlineHandler(c echo.Context) error {
@@ -48,7 +49,7 @@ func KlineHandler(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Error fetching data: %v", err))
 	}
 
-	kline.Meta.Params = bybit.KLineParams{
+	kline.Meta.Params = model.KLineParams{
 		Symbol:   ticker,
 		Interval: interval,
 		Limit:    numLimit,

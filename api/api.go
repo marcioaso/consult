@@ -9,8 +9,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
-	"github.com/marcioaso/consult/api/kline"
-	"github.com/marcioaso/consult/api/top10"
+	"github.com/marcioaso/consult/api/bybitapi"
 )
 
 func SetupServer(port string) *echo.Echo {
@@ -43,6 +42,6 @@ func SetupServer(port string) *echo.Echo {
 
 func configureHandlers(e *echo.Echo) {
 	e.GET("/status", StatusHandler)
-	e.GET("/top10", top10.Top10Handler)
-	e.GET("/kline", kline.KlineHandler)
+	e.GET("/bybit/top10", bybitapi.Top10Handler)
+	e.GET("/bybit/kline", bybitapi.KlineHandler)
 }

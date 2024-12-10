@@ -1,4 +1,4 @@
-package top10
+package bybitapi
 
 import (
 	"net/http"

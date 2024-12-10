@@ -1,11 +1,11 @@
 package bybit
 
-import "fmt"
+import "github.com/marcioaso/consult/app/model"
 
-var lastRecomendedKline KLineData
-var currentRecomendation ActionRecomendation
+var lastRecomendedKline model.KLineData
+var currentRecomendation model.ActionRecomendation
 
-func generateRecomendation(recomendation *ActionRecomendation, tailKLineData []KLineData) ActionRecomendation {
+func generateRecomendation(recomendation *model.ActionRecomendation, tailKLineData []model.KLineAnalysisData) model.ActionRecomendation {
 	recomendation.Note = ""
 
 	currentKLine := tailKLineData[len(tailKLineData)-1]
@@ -14,27 +14,7 @@ func generateRecomendation(recomendation *ActionRecomendation, tailKLineData []K
 	if firstKLine.Open < currentKLine.Close {
 		recomendation.Type = "sell"
 		recomendation.Certainty = 100
-		recomendation.Note = "seems to be down"
-		return *recomendation
-	}
-
-	if currentKLine.Directions.Heavy == "down" &&
-		currentKLine.Directions.Slow == "down" {
-		recomendation.Type = "sell"
-		recomendation.Certainty = 100
-		recomendation.Note = "Slow Heavy down"
-		return *recomendation
-	}
-	if currentKLine.SMAS.SLOW.Angle < 0 {
-		recomendation.Type = "sell"
-		recomendation.Certainty = 100
-		recomendation.Note = "currentKLine.SMAS.SLOW.Angle"
-		return *recomendation
-	}
-	if currentKLine.SMAS.FAST.Value < currentKLine.SMAS.SLOW.Value {
-		recomendation.Type = "sell"
-		recomendation.Certainty = 100
-		recomendation.Note = "currentKLine.SMAS.FAST.Value < currentKLine.SMAS.SLOW.Value"
+		recomendation.Note = "seems to go down"
 		return *recomendation
 	}
 
@@ -45,6 +25,33 @@ func generateRecomendation(recomendation *ActionRecomendation, tailKLineData []K
 		return *recomendation
 	}
 
+	calculateBySMAS(currentKLine, firstKLine, recomendation)
+
+	return *recomendation
+}
+
+func calculateBySMAS(currentKLine, firstKLine model.KLineAnalysisData, recomendation *model.ActionRecomendation) model.ActionRecomendation {
+	currentSmas := currentKLine.SMAS
+
+	if currentKLine.SMAS.HEAVY.Direction == "down" {
+		recomendation.Type = "sell"
+		recomendation.Certainty = 100
+		recomendation.Note = "Heavy down"
+		return *recomendation
+	}
+	if currentKLine.SMAS.FAST.Angle < 0 {
+		recomendation.Type = "sell"
+		recomendation.Certainty = 100
+		recomendation.Note = "currentKLine.SMAS.FAST.Angle"
+		return *recomendation
+	}
+	if currentKLine.SMAS.FAST.Value < currentKLine.SMAS.SLOW.Value {
+		recomendation.Type = "sell"
+		recomendation.Certainty = 100
+		recomendation.Note = "currentKLine.SMAS.FAST.Value < currentKLine.SMAS.SLOW.Value"
+		return *recomendation
+	}
+
 	if currentKLine.SMAS.HEAVY.Value < firstKLine.SMAS.HEAVY.Angle {
 		recomendation.Type = "sell"
 		recomendation.Certainty = 100
@@ -52,55 +59,15 @@ func generateRecomendation(recomendation *ActionRecomendation, tailKLineData []K
 		return *recomendation
 	}
 
-	for i, cursor := range tailKLineData {
-		recomendation.Candles = i + 1
-		if cursor.Directions.Fast == "up" &&
-			cursor.Directions.Heavy == "up" &&
-			cursor.Directions.Slow == "up" {
-			calculateCertainty("up", tailKLineData, recomendation)
-		}
-	}
-	return *recomendation
-}
-
-func calculateCertainty(movement string, klineData []KLineData, recomendation *ActionRecomendation) {
-	if len(klineData) < 5 {
-		recomendation.Certainty = 1.0
-		recomendation.Note = ""
-		return
-	}
-
-	candles := len(klineData)
-
-	recomendation.Candles = candles
-
-	totals := 0.0
-	sums := 0.0
-	weights := []float64{5, 6, 4}
-
-	for j := 0; j < candles; j++ {
-		cursor := klineData[j]
-		totals += float64(j+1) * (weights[0] + weights[1] + weights[2])
-
-		sum := 0.0
-		if cursor.Directions.Fast == movement {
-			sum += weights[0]
-		}
-		if cursor.Directions.Slow == movement {
-			sum += weights[1]
-		}
-		if cursor.Directions.Heavy == movement {
-			sum += weights[2]
-		}
-		sums += float64(j+1) * sum
-	}
-	certainty := sums / totals
-	recomendation.Certainty = certainty * 100
-	if movement == "up" && certainty > 0.6 {
+	if currentSmas.FAST.Angle > 0 &&
+		currentSmas.SLOW.Angle > 0 &&
+		currentSmas.HEAVY.Value > 0 &&
+		currentSmas.FAST.Angle < 45 && currentSmas.FAST.Angle > 3 {
 		recomendation.Type = "buy"
-		recomendation.Note = fmt.Sprintf("***** %v %v", sums, certainty)
-	} else {
-		recomendation.Type = "sell"
-		recomendation.Note = fmt.Sprintf("***** %v %v", sums, certainty)
+		recomendation.Note = "tendency is up"
+
 	}
+
+	return *recomendation
+
 }
