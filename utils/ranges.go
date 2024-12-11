@@ -1,20 +1,19 @@
 package utils
 
 import (
-	"fmt"
 	"slices"
+
+	"github.com/marcioaso/consult/config"
 )
 
-func GetRanges(max int, smas, emas []int) [][]int {
-	starts := []int{slices.Max(smas), slices.Max(emas)}
+func GetRanges(max int) [][]int {
+	starts := []int{slices.Max(config.SmaConf), slices.Max(config.EmaConf)}
 	start := slices.Max(starts)
-	gap := 25
 
 	arr := make([][]int, 0)
-	for i := start + gap; i < max; i++ {
-		arr = append(arr, []int{i - gap, i})
+	for i := start; i < max-start; i++ {
+		arr = append(arr, []int{i, i + start})
 	}
-	fmt.Println(start, max, arr)
 
-	return [][]int{}
+	return arr
 }

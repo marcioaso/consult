@@ -2,6 +2,8 @@ package pkg
 
 import "fmt"
 
+var EmaConf = []int{25, 50}
+
 func CalculateEMA(data []float64, period int) ([]float64, error) {
 	if len(data) < period {
 		return nil, fmt.Errorf("data length must be at least equal to the period")

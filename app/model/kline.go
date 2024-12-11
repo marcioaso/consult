@@ -47,14 +47,3 @@ type KLineData struct {
 
 	Color string `json:"color"`
 }
-
-type KLineAnalysisData struct {
-	KLineData
-
-	Recomendations []ActionRecomendation `json:"recomendations,omitempty"`
-
-	SMAS AverageData `json:"sma,omitempty"`
-	EMAS AverageData `json:"ema,omitempty"`
-
-	InsideBar bool `json:"inside_bar"`
-}

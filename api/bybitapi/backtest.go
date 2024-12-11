@@ -12,7 +12,7 @@ import (
 	"github.com/marcioaso/consult/utils"
 )
 
-func AnalysisHandler(c echo.Context) error {
+func BacktestHandler(c echo.Context) error {
 	defaultInterval := "15m"
 	defaultLimit := "150"
 	defaultTo := fmt.Sprintf("%d", time.Now().UnixNano()/int64(time.Millisecond)) // current time in milliseconds
@@ -61,15 +61,35 @@ func AnalysisHandler(c echo.Context) error {
 	}
 
 	analysis := make([]model.KLineAnalysisData, 0)
+	for i, kline := range klines.Data {
+		tick := 0.0
+		if i > 0 {
+			previousTimestamp := analysis[i-1].KLine.Timestamp
+			currentTimestamp := kline.Timestamp
+			tick = (float64(currentTimestamp) - float64(previousTimestamp)) / 60000
+		}
+		aKline := kline.ToAnalysis(tick)
+		analysis = append(analysis, aKline)
+	}
 
-	ranges := utils.GetRanges(len(klines.Data))
-	fmt.Println(ranges)
+	mtx := utils.GetRanges(len(klines.Data))
 
-	// for _, kline := range klines.Data {
-	// 	klineAnalysis := kline.ToAnalysis()
-	// 	analysis = append(analysis, klineAnalysis)
-	// }
+	response := make([]model.KLineAnalysisData, 0)
+	for i, slice := range mtx {
+		start := slice[0]
+		end := slice[1]
+		previousItem := model.KLineAnalysisData{}
+		if i > 0 {
+			previousItem = analysis[i-1]
+		}
+		history := analysis[start:end]
+		analysis[i].History = history
+		analysis[i].Analyze(previousItem)
+		if i > 1 {
+			response = append(response, analysis[i])
+		}
+	}
 
-	return c.JSON(http.StatusOK, analysis)
+	return c.JSON(http.StatusOK, response)
 
 }

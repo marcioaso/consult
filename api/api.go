@@ -44,4 +44,6 @@ func configureHandlers(e *echo.Echo) {
 	e.GET("/status", StatusHandler)
 	e.GET("/bybit/top10", bybitapi.Top10Handler)
 	e.GET("/bybit/kline", bybitapi.KlineHandler)
+	e.GET("/bybit/analysis", bybitapi.AnalysisHandler)
+	e.GET("/bybit/backtest", bybitapi.BacktestHandler)
 }

@@ -11,7 +11,7 @@ func generateRecomendation(recomendation *model.ActionRecomendation, tailKLineDa
 	currentKLine := tailKLineData[len(tailKLineData)-1]
 	firstKLine := tailKLineData[0]
 
-	if firstKLine.Open < currentKLine.Close {
+	if firstKLine.KLine.Open < currentKLine.KLine.Close {
 		recomendation.Type = "sell"
 		recomendation.Certainty = 100
 		recomendation.Note = "seems to go down"
