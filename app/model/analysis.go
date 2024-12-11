@@ -38,13 +38,20 @@ func enhanceAverageData(item *KLineAnalysisData, previousItem KLineAnalysisData)
 		allCloses = append(allCloses, item.KLine.Close)
 	}
 
-	sma1, _ := pkg.CalculateLastSMA(allCloses, config.SmaConf[0])
-	sma2, _ := pkg.CalculateLastSMA(allCloses, config.SmaConf[1])
-	sma3, _ := pkg.CalculateLastSMA(allCloses, config.SmaConf[2])
+	sma1, _ := pkg.CalculateLastSMA(allCloses, config.SMAS[0])
+	sma2, _ := pkg.CalculateLastSMA(allCloses, config.SMAS[1])
+	sma3, _ := pkg.CalculateLastSMA(allCloses, config.SMAS[2])
+
+	ema1, _ := pkg.CalculateLastEMA(allCloses, config.EMAS[0])
+	ema2, _ := pkg.CalculateLastEMA(allCloses, config.EMAS[1])
+
+	rsi, _ := pkg.CalculateRSI(allCloses, config.RSI)
 
 	previousSMA := previousItem.SMAS
+	previousEMA := previousItem.EMAS
+	previousRSI := previousItem.RSI
 
-	smas := AverageData{
+	item.SMAS = AverageData{
 		FAST: AverageItem{
 			Value:         sma1,
 			Angle:         pkg.GetAngle(0, previousSMA.FAST.Value, item.Tick, sma1),
@@ -61,5 +68,22 @@ func enhanceAverageData(item *KLineAnalysisData, previousItem KLineAnalysisData)
 			PreviousAngle: previousSMA.HEAVY.Angle,
 		},
 	}
-	item.SMAS = smas
+	item.EMAS = AverageData{
+		FAST: AverageItem{
+			Value:         ema1,
+			Angle:         pkg.GetAngle(0, previousEMA.FAST.Value, item.Tick, ema1),
+			PreviousAngle: previousEMA.FAST.Angle,
+		},
+		SLOW: AverageItem{
+			Value:         ema2,
+			Angle:         pkg.GetAngle(0, previousEMA.SLOW.Value, item.Tick, ema2),
+			PreviousAngle: previousEMA.SLOW.Angle,
+		},
+	}
+	item.RSI = AverageData{
+		FAST: AverageItem{
+			Value: rsi,
+			Angle: pkg.GetAngle(0, previousRSI.FAST.Value, item.Tick, rsi),
+		},
+	}
 }
