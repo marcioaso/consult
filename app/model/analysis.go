@@ -1,8 +1,11 @@
 package model
 
 import (
+	"math"
+
 	"github.com/marcioaso/consult/config"
 	"github.com/marcioaso/consult/pkg"
+	"github.com/marcioaso/consult/utils"
 )
 
 type KLineAnalysisData struct {
@@ -35,16 +38,26 @@ func (r KLineData) ToAnalysis(tick float64) KLineAnalysisData {
 func enhanceAverageData(item *KLineAnalysisData, previousItem KLineAnalysisData) {
 	allCloses := []float64{}
 	for _, item := range item.History {
-		allCloses = append(allCloses, item.KLine.Close)
+		close := item.KLine.Close
+		if close == math.Trunc(close) {
+			close += +0.00000000001
+		}
+		allCloses = append(allCloses, close)
 	}
-
-	sma1, _ := pkg.CalculateLastSMA(allCloses, config.SmaConf[0])
-	sma2, _ := pkg.CalculateLastSMA(allCloses, config.SmaConf[1])
-	sma3, _ := pkg.CalculateLastSMA(allCloses, config.SmaConf[2])
-
 	previousSMA := previousItem.SMAS
+	previousEMA := previousItem.EMAS
+	previousRSI := previousItem.RSI
 
-	smas := AverageData{
+	sma1 := utils.CalculateLastSMA(allCloses, config.SMAS[0])
+	sma2 := utils.CalculateLastSMA(allCloses, config.SMAS[1])
+	sma3 := utils.CalculateLastSMA(allCloses, config.SMAS[2])
+
+	ema1 := utils.CalculateLastEMA(allCloses, config.EMAS[0])
+	ema2 := utils.CalculateLastEMA(allCloses, config.EMAS[1])
+
+	rsi := utils.CalculateLastRSI(allCloses, config.RSI)
+
+	item.SMAS = AverageData{
 		FAST: AverageItem{
 			Value:         sma1,
 			Angle:         pkg.GetAngle(0, previousSMA.FAST.Value, item.Tick, sma1),
@@ -61,5 +74,23 @@ func enhanceAverageData(item *KLineAnalysisData, previousItem KLineAnalysisData)
 			PreviousAngle: previousSMA.HEAVY.Angle,
 		},
 	}
-	item.SMAS = smas
+	item.EMAS = AverageData{
+		FAST: AverageItem{
+			Value:         ema1,
+			Angle:         pkg.GetAngle(0, previousEMA.FAST.Value, item.Tick, ema1),
+			PreviousAngle: previousEMA.FAST.Angle,
+		},
+		SLOW: AverageItem{
+			Value:         ema2,
+			Angle:         pkg.GetAngle(0, previousEMA.SLOW.Value, item.Tick, ema2),
+			PreviousAngle: previousEMA.SLOW.Angle,
+		},
+	}
+	item.RSI = AverageData{
+		FAST: AverageItem{
+			Value:         rsi,
+			Angle:         pkg.GetAngle(0, previousRSI.FAST.Value, item.Tick, rsi),
+			PreviousAngle: previousRSI.FAST.Angle,
+		},
+	}
 }

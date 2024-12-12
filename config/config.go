@@ -6,8 +6,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-var EmaConf = []int{25, 50}
-var SmaConf = []int{25, 50, 100}
+var EMAS = []int{25, 50}
+var SMAS = []int{25, 50, 100}
+var RSI = 20
 
 // Config holds all configuration values
 type Config struct {
