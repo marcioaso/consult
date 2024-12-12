@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/marcioaso/consult/app/bybit"
 	"github.com/marcioaso/consult/app/model"
+	"github.com/marcioaso/consult/pkg"
 	"github.com/marcioaso/consult/utils"
 )
 
@@ -86,7 +87,7 @@ func BacktestHandler(c echo.Context) error {
 		}
 		history := analysis[start:end]
 		analysis[j].History = history
-		analysis[j].Analyze(previousItem)
+		pkg.EnhanceAverageData(&analysis[j], previousItem)
 		if i > 1 {
 			response = append(response, analysis[j])
 		}
