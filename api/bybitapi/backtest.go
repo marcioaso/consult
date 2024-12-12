@@ -73,20 +73,22 @@ func BacktestHandler(c echo.Context) error {
 	}
 
 	mtx := utils.GetRanges(len(klines.Data))
+	gap := len(analysis) - len(mtx)
 
 	response := make([]model.KLineAnalysisData, 0)
 	for i, slice := range mtx {
+		j := i + gap
 		start := slice[0]
 		end := slice[1]
 		previousItem := model.KLineAnalysisData{}
 		if i > 0 {
-			previousItem = analysis[i-1]
+			previousItem = analysis[j-1]
 		}
 		history := analysis[start:end]
-		analysis[i].History = history
-		analysis[i].Analyze(previousItem)
+		analysis[j].History = history
+		analysis[j].Analyze(previousItem)
 		if i > 1 {
-			response = append(response, analysis[i])
+			response = append(response, analysis[j])
 		}
 	}
 

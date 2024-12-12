@@ -32,7 +32,7 @@ type KLineResponse struct {
 }
 
 type KLineData struct {
-	Datetime       string  `json:"datetime"`
+	Datetime       string  `json:"date_time"`
 	Timestamp      int64   `json:"timestamp"`
 	Symbol         string  `json:"symbol"`
 	SymbolInternal string  `json:"symbol_internal"`

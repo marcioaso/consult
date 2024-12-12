@@ -11,8 +11,8 @@ func GetRanges(max int) [][]int {
 	start := slices.Max(starts)
 
 	arr := make([][]int, 0)
-	for i := start; i < max-start; i++ {
-		arr = append(arr, []int{i, i + start})
+	for i := start; i < max; i++ {
+		arr = append(arr, []int{i - start, i})
 	}
 
 	return arr
