@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/marcioaso/consult/app/bybit"
 	"github.com/marcioaso/consult/app/model"
+	"github.com/marcioaso/consult/pkg"
 	"github.com/marcioaso/consult/utils"
 )
 
@@ -61,15 +62,36 @@ func AnalysisHandler(c echo.Context) error {
 	}
 
 	analysis := make([]model.KLineAnalysisData, 0)
+	for i, kline := range klines.Data {
+		tick := 0.0
+		if i > 0 {
+			previousTimestamp := analysis[i-1].KLine.Timestamp
+			currentTimestamp := kline.Timestamp
+			tick = (float64(currentTimestamp) - float64(previousTimestamp)) / 60000
+		}
+		aKline := kline.ToAnalysis(tick)
+		analysis = append(analysis, aKline)
+	}
+	mtx := utils.GetRanges(len(klines.Data))
+	gap := len(analysis) - len(mtx)
 
-	ranges := utils.GetRanges(len(klines.Data))
-	fmt.Println(ranges)
+	response := make([]model.KLineAnalysisData, 0)
+	for i, slice := range mtx {
+		j := i + gap
+		start := slice[0]
+		end := slice[1]
+		previousItem := model.KLineAnalysisData{}
+		if i > 0 {
+			previousItem = analysis[j-1]
+		}
+		history := analysis[start:end]
+		analysis[j].History = history
+		pkg.EnhanceAverageData(&analysis[j], previousItem)
+		if i > 1 {
+			response = append(response, analysis[j])
+		}
+	}
 
-	// for _, kline := range klines.Data {
-	// 	klineAnalysis := kline.ToAnalysis()
-	// 	analysis = append(analysis, klineAnalysis)
-	// }
-
-	return c.JSON(http.StatusOK, analysis)
+	return c.JSON(http.StatusOK, response)
 
 }

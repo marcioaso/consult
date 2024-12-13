@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Analysis</title>
+    <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@3.7.0/dist/lightweight-charts.standalone.production.js"></script>
+</head>
+<body>
+    <div id="chart" style="width: 100vw; height: 400px;"></div>
+    <div id="rsi-chart" style="width: 1200px; height: 200px; margin-top: 20px;"></div>
+    <script>
+        fetch('http://localhost:8080/bybit/analysis?symbol=BTCUSDT&limit=500&interval=15m') // Atualizado para o endpoint certo
+        .then(response => response.json())
+            .then(data => {
+                // Cria o gráfico principal
+                const chart = LightweightCharts.createChart(document.getElementById('chart'), {
+                    width: 1200,
+                    height: 400,
+                    layout: {
+                        backgroundColor: '#ffffff',
+                        textColor: '#333',
+                    },
+                    grid: {
+                        vertLines: { color: '#eeeeee' },
+                        horzLines: { color: '#eeeeee' },
+                    },
+                    timeScale: {
+                        timeVisible: true, // Mostra horas e minutos
+                    },
+                });
+
+                // Série de candlesticks
+                const candlestickSeries = chart.addCandlestickSeries();
+                const chartData = data.map((item, index) => {
+                    return ({
+                        time: item.kline.timestamp/1000, // Substitua por timestamps reais, se disponíveis
+                        open: item.kline.open,
+                        high: item.kline.high,
+                        low: item.kline.low,
+                        close: item.kline.close,
+                    })
+                });
+                candlestickSeries.setData(chartData);
+
+                // Adiciona SMAs (linhas de média simples)
+                // const smaSeries25 = chart.addLineSeries({
+                //     color: 'yellow',
+                //     lineWidth: 2,
+                // });
+                // const smaSeries50 = chart.addLineSeries({
+                //     color: 'green',
+                //     lineWidth: 3,
+                // });
+                // const smaSeries100 = chart.addLineSeries({
+                //     color: 'magenta',
+                //     lineWidth: 4,
+                // });
+                // smaSeries25.setData(
+                //     data.map((item, index) => ({ time: item.kline.timestamp/1000, value: item.sma.fast.value })) // SMA de 25
+                // );
+                // smaSeries50.setData(
+                //     data.map((item, index) => ({ time: item.kline.timestamp/1000, value: item.sma.slow.value })) // SMA de 50
+                // );
+                // smaSeries100.setData(
+                //     data.map((item, index) => ({ time: item.kline.timestamp/1000, value: item.sma.heavy.value })) // SMA de 50
+                // );
+
+                // // Adiciona EMAs (linhas de média exponencial)
+                // const emaSeries25 = chart.addLineSeries({
+                //     color: 'orange',
+                //     lineWidth: 5,
+                // });
+                // const emaSeries50 = chart.addLineSeries({
+                //     color: 'red',
+                //     lineWidth: 6,
+                // });
+                // emaSeries25.setData(
+                //     data.map((item, index) => ({ time: item.kline.timestamp/1000, value: item.ema.fast.value })) // EMA de 25
+                // );
+                // emaSeries50.setData(
+                //     data.map((item, index) => ({ time: item.kline.timestamp/1000, value: item.ema.slow.value })) // EMA de 50
+                // );
+
+                // Gráfico RSI separado
+                const rsiChart = LightweightCharts.createChart(document.getElementById('rsi-chart'), {
+                    width: 1200,
+                    height: 200,
+                    layout: {
+                        backgroundColor: '#ffffff',
+                        textColor: '#333',
+                    },
+                    grid: {
+                        vertLines: { color: '#eeeeee' },
+                        horzLines: { color: '#eeeeee' },
+                    },
+                });
+
+                const rsiSeries = rsiChart.addLineSeries({
+                    color: 'red',
+                    lineWidth: 2,
+                });
+                rsiSeries.setData(
+                    data.map((item, index) => ({ time: item.kline.timestamp/1000, value: item.rsi.fast.value })) // RSI
+                );
+            });
+    </script>
+</body>
+</html>
