@@ -1,6 +1,8 @@
 package pkg
 
-import "math"
+import (
+	"math"
+)
 
 func GetAngle(x1, y1, x2, y2 float64) float64 {
 	deltaX := x2 - x1

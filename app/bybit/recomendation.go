@@ -3,71 +3,71 @@ package bybit
 import "github.com/marcioaso/consult/app/model"
 
 var lastRecomendedKline model.KLineData
-var currentRecomendation model.ActionRecomendation
+var currentRecommendation model.ActionRecommendation
 
-func generateRecomendation(recomendation *model.ActionRecomendation, tailKLineData []model.KLineAnalysisData) model.ActionRecomendation {
-	recomendation.Note = ""
+func generateRecommendation(recommendation *model.ActionRecommendation, tailKLineData []model.KLineAnalysisData) model.ActionRecommendation {
+	recommendation.Note = ""
 
 	currentKLine := tailKLineData[len(tailKLineData)-1]
 	firstKLine := tailKLineData[0]
 
 	if firstKLine.KLine.Open < currentKLine.KLine.Close {
-		recomendation.Type = "sell"
-		recomendation.Certainty = 100
-		recomendation.Note = "seems to go down"
-		return *recomendation
+		recommendation.Type = "sell"
+		recommendation.Certainty = 100
+		recommendation.Note = "seems to go down"
+		return *recommendation
 	}
 
-	if currentRecomendation.Close < lastRecomendedKline.Low {
-		recomendation.Type = "sell"
-		recomendation.Certainty = 100
-		recomendation.Note = "currentRecomendation.Close < lastRecomendedKline.Low"
-		return *recomendation
+	if currentRecommendation.Close < lastRecomendedKline.Low {
+		recommendation.Type = "sell"
+		recommendation.Certainty = 100
+		recommendation.Note = "currentRecommendation.Close < lastRecomendedKline.Low"
+		return *recommendation
 	}
 
-	calculateBySMAS(currentKLine, firstKLine, recomendation)
+	calculateBySMAS(currentKLine, firstKLine, recommendation)
 
-	return *recomendation
+	return *recommendation
 }
 
-func calculateBySMAS(currentKLine, firstKLine model.KLineAnalysisData, recomendation *model.ActionRecomendation) model.ActionRecomendation {
+func calculateBySMAS(currentKLine, firstKLine model.KLineAnalysisData, recommendation *model.ActionRecommendation) model.ActionRecommendation {
 	currentSmas := currentKLine.SMAS
 
 	if currentKLine.SMAS.HEAVY.Direction == "down" {
-		recomendation.Type = "sell"
-		recomendation.Certainty = 100
-		recomendation.Note = "Heavy down"
-		return *recomendation
+		recommendation.Type = "sell"
+		recommendation.Certainty = 100
+		recommendation.Note = "Heavy down"
+		return *recommendation
 	}
 	if currentKLine.SMAS.FAST.Angle < 0 {
-		recomendation.Type = "sell"
-		recomendation.Certainty = 100
-		recomendation.Note = "currentKLine.SMAS.FAST.Angle"
-		return *recomendation
+		recommendation.Type = "sell"
+		recommendation.Certainty = 100
+		recommendation.Note = "currentKLine.SMAS.FAST.Angle"
+		return *recommendation
 	}
 	if currentKLine.SMAS.FAST.Value < currentKLine.SMAS.SLOW.Value {
-		recomendation.Type = "sell"
-		recomendation.Certainty = 100
-		recomendation.Note = "currentKLine.SMAS.FAST.Value < currentKLine.SMAS.SLOW.Value"
-		return *recomendation
+		recommendation.Type = "sell"
+		recommendation.Certainty = 100
+		recommendation.Note = "currentKLine.SMAS.FAST.Value < currentKLine.SMAS.SLOW.Value"
+		return *recommendation
 	}
 
 	if currentKLine.SMAS.HEAVY.Value < firstKLine.SMAS.HEAVY.Angle {
-		recomendation.Type = "sell"
-		recomendation.Certainty = 100
-		recomendation.Note = "< firstKLine.SMAS.HEAVY.Angle"
-		return *recomendation
+		recommendation.Type = "sell"
+		recommendation.Certainty = 100
+		recommendation.Note = "< firstKLine.SMAS.HEAVY.Angle"
+		return *recommendation
 	}
 
 	if currentSmas.FAST.Angle > 0 &&
 		currentSmas.SLOW.Angle > 0 &&
 		currentSmas.HEAVY.Value > 0 &&
 		currentSmas.FAST.Angle < 45 && currentSmas.FAST.Angle > 3 {
-		recomendation.Type = "buy"
-		recomendation.Note = "tendency is up"
+		recommendation.Type = "buy"
+		recommendation.Note = "tendency is up"
 
 	}
 
-	return *recomendation
+	return *recommendation
 
 }

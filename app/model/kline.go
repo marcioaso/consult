@@ -15,8 +15,8 @@ type KLineParams struct {
 }
 
 type KLineResolutions struct {
-	ResultCount int                   `json:"results"`
-	Advices     []ActionRecomendation `json:"advices"`
+	ResultCount int                    `json:"results"`
+	Advices     []ActionRecommendation `json:"advices"`
 }
 
 type KLineMeta struct {

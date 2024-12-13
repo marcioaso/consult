@@ -66,4 +66,7 @@ func EnhanceAverageData(item *model.KLineAnalysisData, previousItem model.KLineA
 			PreviousAngle: previousRSI.FAST.Angle,
 		},
 	}
+
+	breakouts := utils.CalculateBreakoutProbabilities(item.History, config.BREAKOUT_PERCENT, config.BREAKOUT_LAYERS)
+	item.Breakouts = breakouts
 }

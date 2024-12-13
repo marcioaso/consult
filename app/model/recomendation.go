@@ -1,6 +1,6 @@
 package model
 
-type ActionRecomendation struct {
+type ActionRecommendation struct {
 	Datetime  string  `json:"datetime"`
 	Type      string  `json:"type"`
 	Candles   int     `json:"candles"`
@@ -10,5 +10,5 @@ type ActionRecomendation struct {
 }
 
 type Directions struct {
-	Recomendation ActionRecomendation `json:"recomendation"`
+	Recommendation ActionRecommendation `json:"recommendation"`
 }

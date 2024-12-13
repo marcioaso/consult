@@ -10,6 +10,9 @@ var EMAS = []int{25, 50}
 var SMAS = []int{25, 50, 100}
 var RSI = 20
 
+var BREAKOUT_PERCENT = 0.1
+var BREAKOUT_LAYERS = 3
+
 // Config holds all configuration values
 type Config struct {
 	AppPort string
