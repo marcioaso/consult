@@ -72,11 +72,12 @@ func BacktestHandler(c echo.Context) error {
 		aKline := kline.ToAnalysis(tick)
 		analysis = append(analysis, aKline)
 	}
-
 	mtx := utils.GetRanges(len(klines.Data))
 	gap := len(analysis) - len(mtx)
 
-	response := make([]model.KLineAnalysisData, 0)
+	recommendations := make([]model.ActionRecommendation, 0)
+
+	lastStopLoss := 0.0
 	for i, slice := range mtx {
 		j := i + gap
 		start := slice[0]
@@ -88,10 +89,55 @@ func BacktestHandler(c echo.Context) error {
 		history := analysis[start:end]
 		analysis[j].History = history
 		pkg.EnhanceAverageData(&analysis[j], previousItem)
+
+		if i > 2 {
+			stopLoss := analysis[j-3].KLine.Low
+			if lastStopLoss < stopLoss {
+				analysis[j].StopLoss = stopLoss
+				lastStopLoss = stopLoss
+			}
+		}
+
 		if i > 1 {
-			response = append(response, analysis[j])
+			recommendation := model.ActionRecommendation{
+				Datetime: analysis[j].KLine.Datetime,
+			}
+			bybit.GenerateRecommendation(&recommendation, history)
+			if recommendation.Type != "" &&
+				recommendation.Type != "wait" &&
+				bybit.CurrentRecommendation.Type != recommendation.Type {
+				recommendations = append(recommendations, recommendation)
+				bybit.CurrentRecommendation = recommendation
+				bybit.LastRecommendedKline = analysis[j]
+				if recommendation.Type == "sell" {
+					lastStopLoss = 0.0
+				}
+			}
 		}
 	}
+
+	response := model.KLineBacktestResponse{
+		Recommendations: recommendations,
+	}
+
+	potential := model.KLinePotential{
+		Initial:   100,
+		Final:     100,
+		Variation: 0,
+	}
+	for _, r := range recommendations {
+		if r.Type == "buy" {
+			potential.Price = r.Close
+			potential.Bought = potential.Final / r.Close
+			potential.Final = 0
+		} else if r.Type == "sell" && potential.Bought > 0 {
+			v := potential.Bought * r.Close
+			potential.Variation = v - potential.Initial
+			potential.Final = v
+			potential.Bought = 0
+		}
+	}
+	response.Potential = potential
 
 	return c.JSON(http.StatusOK, response)
 

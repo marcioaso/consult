@@ -75,7 +75,10 @@ func AnalysisHandler(c echo.Context) error {
 	mtx := utils.GetRanges(len(klines.Data))
 	gap := len(analysis) - len(mtx)
 
-	response := make([]model.KLineAnalysisData, 0)
+	recommendations := make([]model.ActionRecommendation, 0)
+	analysisData := make([]model.KLineAnalysisData, 0)
+
+	lastStopLoss := 0.0
 	for i, slice := range mtx {
 		j := i + gap
 		start := slice[0]
@@ -87,9 +90,35 @@ func AnalysisHandler(c echo.Context) error {
 		history := analysis[start:end]
 		analysis[j].History = history
 		pkg.EnhanceAverageData(&analysis[j], previousItem)
-		if i > 1 {
-			response = append(response, analysis[j])
+
+		if i > 2 {
+			stopLoss := analysis[j-3].KLine.Low
+			if lastStopLoss < stopLoss {
+				analysis[j].StopLoss = stopLoss
+				lastStopLoss = stopLoss
+			}
 		}
+
+		if i > 1 {
+			recommendation := model.ActionRecommendation{
+				Datetime: analysis[j].KLine.Datetime,
+			}
+			bybit.GenerateRecommendation(&recommendation, history)
+			if recommendation.Type != "" && bybit.CurrentRecommendation.Type != recommendation.Type {
+				recommendations = append(recommendations, recommendation)
+				bybit.CurrentRecommendation = recommendation
+				bybit.LastRecommendedKline = analysis[j]
+				if recommendation.Type == "sell" {
+					lastStopLoss = 0.0
+				}
+			}
+			analysisData = append(analysisData, analysis[j])
+		}
+	}
+
+	response := model.KLineAnalysisResponse{
+		Recommendations: recommendations,
+		Data:            analysisData,
 	}
 
 	return c.JSON(http.StatusOK, response)

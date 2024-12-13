@@ -25,8 +25,14 @@ func EnhanceAverageData(item *model.KLineAnalysisData, previousItem model.KLineA
 	sma2 := utils.CalculateLastSMA(allCloses, config.SMAS[1])
 	sma3 := utils.CalculateLastSMA(allCloses, config.SMAS[2])
 
-	ema1 := utils.CalculateLastEMA(allCloses, config.EMAS[0])
-	ema2 := utils.CalculateLastEMA(allCloses, config.EMAS[1])
+	ema1 := 0.0
+	if len(item.History) > config.EMAS[0] {
+		utils.CalculateLastEMA(allCloses, config.EMAS[0])
+	}
+	ema2 := 0.0
+	if len(item.History) > config.EMAS[1] {
+		utils.CalculateLastEMA(allCloses, config.EMAS[1])
+	}
 
 	rsi := utils.CalculateLastRSI(allCloses, config.RSI)
 

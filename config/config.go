@@ -7,7 +7,7 @@ import (
 )
 
 var EMAS = []int{25, 50}
-var SMAS = []int{25, 50, 100}
+var SMAS = []int{9, 25, 50}
 var RSI = 20
 
 var BREAKOUT_PERCENT = 0.1
