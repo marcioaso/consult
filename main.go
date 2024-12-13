@@ -7,7 +7,6 @@ import (
 
 func main() {
 	config.LoadConfig()
-
 	port := config.AppConfig.AppPort
 	api.SetupServer(port)
 }
