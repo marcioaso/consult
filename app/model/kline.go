@@ -41,6 +41,7 @@ type KLineData struct {
 	Close          float64 `json:"close"`
 	High           float64 `json:"high"`
 	Low            float64 `json:"low"`
+	Angle          float64 `json:"angle"`
 
 	CloseOpen        float64 `json:"close-open"`
 	CloseOpenPercent float64 `json:"close-open_percent"`

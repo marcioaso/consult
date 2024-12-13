@@ -15,11 +15,11 @@ type KLineAnalysisData struct {
 	KLine KLineData `json:"kline"`
 	Tick  float64   `json:"tick"`
 
-	StopLoss float64 `json:"stop_loss"`
+	SMAS       AverageData `json:"sma"`
+	EMAS       AverageData `json:"ema"`
+	RSI        AverageData `json:"rsi"`
+	Stochastic float64     `json:"stochastic"`
 
-	SMAS      AverageData     `json:"sma"`
-	EMAS      AverageData     `json:"ema"`
-	RSI       AverageData     `json:"rsi"`
 	Breakouts []BreakoutLevel `json:"breakouts"`
 
 	InsideBar bool `json:"inside_bar"`
@@ -33,7 +33,7 @@ type KLinePotential struct {
 	Bought     float64 `json:"bought"`
 	Price      float64 `json:"-"`
 	Variation  float64 `json:"variation"`
-	Percentage float64 `json:"percentage"`
+	Efficiency float64 `json:"efficiency"`
 }
 
 type KLineBacktestResponse struct {

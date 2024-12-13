@@ -17,6 +17,9 @@ func EnhanceAverageData(item *model.KLineAnalysisData, previousItem model.KLineA
 		}
 		allCloses = append(allCloses, close)
 	}
+
+	item.Stochastic = utils.CalculateLastStochastic(item.History, config.Stochastic)
+
 	previousSMA := previousItem.SMAS
 	previousEMA := previousItem.EMAS
 	previousRSI := previousItem.RSI
@@ -27,11 +30,15 @@ func EnhanceAverageData(item *model.KLineAnalysisData, previousItem model.KLineA
 
 	ema1 := 0.0
 	if len(item.History) > config.EMAS[0] {
-		utils.CalculateLastEMA(allCloses, config.EMAS[0])
+		ema1 = utils.CalculateLastEMA(allCloses, config.EMAS[0])
 	}
 	ema2 := 0.0
 	if len(item.History) > config.EMAS[1] {
-		utils.CalculateLastEMA(allCloses, config.EMAS[1])
+		ema2 = utils.CalculateLastEMA(allCloses, config.EMAS[1])
+	}
+	ema3 := 0.0
+	if len(item.History) > config.EMAS[2] {
+		ema3 = utils.CalculateLastEMA(allCloses, config.EMAS[2])
 	}
 
 	rsi := utils.CalculateLastRSI(allCloses, config.RSI)
@@ -62,6 +69,11 @@ func EnhanceAverageData(item *model.KLineAnalysisData, previousItem model.KLineA
 		SLOW: model.AverageItem{
 			Value:         ema2,
 			Angle:         GetAngle(0, previousEMA.SLOW.Value, item.Tick, ema2),
+			PreviousAngle: previousEMA.SLOW.Angle,
+		},
+		HEAVY: model.AverageItem{
+			Value:         ema3,
+			Angle:         GetAngle(0, previousEMA.HEAVY.Value, item.Tick, ema3),
 			PreviousAngle: previousEMA.SLOW.Angle,
 		},
 	}

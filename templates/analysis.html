@@ -44,43 +44,51 @@
                 candlestickSeries.setData(chartData);
 
                 // Adiciona SMAs (linhas de média simples)
-                // const smaSeries25 = chart.addLineSeries({
-                //     color: 'yellow',
-                //     lineWidth: 2,
-                // });
-                // const smaSeries50 = chart.addLineSeries({
-                //     color: 'green',
-                //     lineWidth: 3,
-                // });
-                // const smaSeries100 = chart.addLineSeries({
-                //     color: 'magenta',
-                //     lineWidth: 4,
-                // });
-                // smaSeries25.setData(
-                //     data.map((item, index) => ({ time: item.kline.timestamp/1000, value: item.sma.fast.value })) // SMA de 25
-                // );
-                // smaSeries50.setData(
-                //     data.map((item, index) => ({ time: item.kline.timestamp/1000, value: item.sma.slow.value })) // SMA de 50
-                // );
-                // smaSeries100.setData(
-                //     data.map((item, index) => ({ time: item.kline.timestamp/1000, value: item.sma.heavy.value })) // SMA de 50
-                // );
+                const smaSeries25 = chart.addLineSeries({
+                    color: 'yellow',
+                    lineWidth: 2,
+                });
+                const smaSeries50 = chart.addLineSeries({
+                    color: 'green',
+                    lineWidth: 3,
+                });
+                const smaSeries100 = chart.addLineSeries({
+                    color: 'magenta',
+                    lineWidth: 4,
+                });
+                smaSeries25.setData(
+                    data.map((item, index) => ({ time: item.kline.timestamp/1000, value: item.sma.fast.value })) // SMA de 25
+                );
+                smaSeries50.setData(
+                    data.map((item, index) => ({ time: item.kline.timestamp/1000, value: item.sma.slow.value })) // SMA de 50
+                );
+                smaSeries100.setData(
+                    data.map((item, index) => ({ time: item.kline.timestamp/1000, value: item.sma.heavy.value })) // SMA de 50
+                );
 
-                // // Adiciona EMAs (linhas de média exponencial)
-                // const emaSeries25 = chart.addLineSeries({
-                //     color: 'orange',
-                //     lineWidth: 5,
-                // });
-                // const emaSeries50 = chart.addLineSeries({
-                //     color: 'red',
-                //     lineWidth: 6,
-                // });
-                // emaSeries25.setData(
-                //     data.map((item, index) => ({ time: item.kline.timestamp/1000, value: item.ema.fast.value })) // EMA de 25
-                // );
-                // emaSeries50.setData(
-                //     data.map((item, index) => ({ time: item.kline.timestamp/1000, value: item.ema.slow.value })) // EMA de 50
-                // );
+                // Adiciona EMAs (linhas de média exponencial)
+                const emaSeries25 = chart.addLineSeries({
+                    color: 'orange',
+                    lineWidth: 5,
+                });
+                const emaSeries50 = chart.addLineSeries({
+                    color: 'red',
+                    lineWidth: 6,
+                });
+
+                const emaSeries200 = chart.addLineSeries({
+                    color: 'purple',
+                    lineWidth: 10,
+                });
+                emaSeries25.setData(
+                    data.map((item, index) => ({ time: item.kline.timestamp/1000, value: item.ema.fast.value })) // EMA de 25
+                );
+                emaSeries50.setData(
+                    data.map((item, index) => ({ time: item.kline.timestamp/1000, value: item.ema.slow.value })) // EMA de 50
+                );
+                emaSeries200.setData(
+                    data.map((item, index) => ({ time: item.kline.timestamp/1000, value: item.ema.heavy.value })) // EMA de 50
+                );
 
                 // Gráfico RSI separado
                 const rsiChart = LightweightCharts.createChart(document.getElementById('rsi-chart'), {

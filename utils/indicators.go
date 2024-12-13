@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"math"
+
 	trade_indicators "github.com/go-whale/trade-indicators"
 	"github.com/marcioaso/consult/app/model"
 )
@@ -18,6 +20,32 @@ func CalculateLastEMA(data []float64, period int) float64 {
 func CalculateLastRSI(prices []float64, period int) float64 {
 	rsis, _ := trade_indicators.CalculateRSI(prices, period)
 	return rsis[len(rsis)-1]
+}
+
+func CalculateLastStochastic(data []model.KLineAnalysisData, period int) float64 {
+	highs := make([]float64, 0)
+	lows := make([]float64, 0)
+	closes := make([]float64, 0)
+	for _, aData := range data {
+		kline := aData.KLine
+		high := kline.High
+		if high == math.Trunc(high) {
+			high += +0.00000001
+		}
+		low := kline.Low
+		if low == math.Trunc(low) {
+			low += +0.00000001
+		}
+		close := kline.Close
+		if close == math.Trunc(close) {
+			close += +0.00000001
+		}
+		highs = append(highs, high)
+		lows = append(lows, low)
+		closes = append(closes, close)
+	}
+	k, _, _ := trade_indicators.CalculateStochastic(highs, lows, closes, period)
+	return k[len(k)-1]
 }
 
 func CalculateBreakoutProbabilities(data []model.KLineAnalysisData, perc float64, nbr int) []model.BreakoutLevel {

@@ -2,6 +2,7 @@ package bybitapi
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 	"time"
@@ -14,6 +15,10 @@ import (
 )
 
 func BacktestHandler(c echo.Context) error {
+	bybit.LastRecommendedKline = model.KLineAnalysisData{}
+	bybit.CurrentRecommendation = model.ActionRecommendation{}
+
+	defer pkg.Elapsed("backtest")()
 	defaultInterval := "15m"
 	defaultLimit := "150"
 	defaultTo := fmt.Sprintf("%d", time.Now().UnixNano()/int64(time.Millisecond)) // current time in milliseconds
@@ -90,20 +95,21 @@ func BacktestHandler(c echo.Context) error {
 		analysis[j].History = history
 		pkg.EnhanceAverageData(&analysis[j], previousItem)
 
-		if i > 2 {
-			stopLoss := analysis[j-3].KLine.Low
-			if lastStopLoss < stopLoss {
-				analysis[j].StopLoss = stopLoss
-				lastStopLoss = stopLoss
-			}
-		}
-
 		if i > 1 {
+			stopLoss := analysis[i-1].KLine.Low
+			risk := math.Abs(analysis[j-1].KLine.Low - analysis[j].KLine.Close)
 			recommendation := model.ActionRecommendation{
 				Datetime: analysis[j].KLine.Datetime,
+				StopLoss: stopLoss,
+				Risk:     analysis[j].KLine.Close + risk,
 			}
+			if lastStopLoss < stopLoss {
+				recommendation.StopLoss = stopLoss
+				lastStopLoss = stopLoss
+			}
+
 			bybit.GenerateRecommendation(&recommendation, history)
-			if recommendation.Type != "" &&
+			if !(bybit.CurrentRecommendation.Type == "" && recommendation.Type == "sell") &&
 				recommendation.Type != "wait" &&
 				bybit.CurrentRecommendation.Type != recommendation.Type {
 				recommendations = append(recommendations, recommendation)
@@ -116,28 +122,46 @@ func BacktestHandler(c echo.Context) error {
 		}
 	}
 
-	response := model.KLineBacktestResponse{
-		Recommendations: recommendations,
-	}
+	response := model.KLineBacktestResponse{}
+	profit := 0.0
+	totalTransactions := 0.0
 
 	potential := model.KLinePotential{
-		Initial:   100,
-		Final:     100,
+		Initial:   500,
+		Final:     500,
 		Variation: 0,
 	}
-	for _, r := range recommendations {
-		if r.Type == "buy" {
+
+	for i, r := range recommendations {
+		if r.Datetime != "2024-12-13T17:51:00-04:00" && r.Type == "buy" {
 			potential.Price = r.Close
 			potential.Bought = potential.Final / r.Close
 			potential.Final = 0
 		} else if r.Type == "sell" && potential.Bought > 0 {
+			potential.Price = r.Close
 			v := potential.Bought * r.Close
 			potential.Variation = v - potential.Initial
+			recommendations[i].ProfitLoss = potential.Variation
 			potential.Final = v
 			potential.Bought = 0
+			if potential.Variation > 0 {
+				profit++
+			}
+			totalTransactions++
 		}
 	}
+	// if potential.Bought > 0 {
+	// 	v := potential.Bought * potential.Price
+	// 	potential.Variation = v - potential.Initial
+	// 	potential.Final = v
+	// 	potential.Bought = 0
+	// }
+
+	if totalTransactions > 0 {
+		potential.Efficiency = (profit / totalTransactions) * 100
+	}
 	response.Potential = potential
+	response.Recommendations = recommendations
 
 	return c.JSON(http.StatusOK, response)
 

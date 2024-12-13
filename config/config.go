@@ -6,9 +6,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-var EMAS = []int{25, 50}
+var EMAS = []int{25, 50, 200}
 var SMAS = []int{9, 25, 50}
 var RSI = 20
+var Stochastic = 3
 
 var BREAKOUT_PERCENT = 0.1
 var BREAKOUT_LAYERS = 3
