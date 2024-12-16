@@ -6,8 +6,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-var EMAS = []int{25, 50, 200}
-var SMAS = []int{9, 25, 50}
+var EMAS = []int{21, 50, 200}
+var SMAS = []int{9, 20, 50}
 var RSI = 20
 var Stochastic = 3
 
@@ -18,8 +18,10 @@ var BREAKOUT_LAYERS = 3
 type Config struct {
 	AppPort string
 	DBHost  string
+	DBPort  string
 	DBUser  string
 	DBPass  string
+	DBName  string
 }
 
 // Global variable to hold the loaded configuration
@@ -41,5 +43,7 @@ func LoadConfig() {
 		DBHost:  v.GetString("DB_HOST"),
 		DBUser:  v.GetString("DB_USER"),
 		DBPass:  v.GetString("DB_PASS"),
+		DBPort:  v.GetString("DB_PORT"),
+		DBName:  v.GetString("DB_NAME"),
 	}
 }

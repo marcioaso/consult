@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/marcioaso/consult/app/model"
 	"golang.org/x/exp/rand"
 )
 
@@ -15,9 +16,9 @@ func randomPercentageVariation(base float64, maxVariation float64) float64 {
 }
 
 // generateData gera uma lista de BybitResponse aleatórios com variação limitada
-func generateData(count int, initialPrice float64, maxVariation float64, minPrice float64) []BybitResponse {
+func generateData(count int, initialPrice float64, maxVariation float64, minPrice float64) []model.BybitResponse {
 	rand.Seed(uint64(time.Now().UnixNano()))
-	data := make([]BybitResponse, count)
+	data := make([]model.BybitResponse, count)
 
 	// Inicializa o preço base
 	lastClose := initialPrice
@@ -41,7 +42,7 @@ func generateData(count int, initialPrice float64, maxVariation float64, minPric
 
 		volume := randomPercentageVariation(1000, maxVariation) // Volume aleatório com base em 1000
 
-		data[i] = BybitResponse{
+		data[i] = model.BybitResponse{
 			T:  time.Now().Unix() + int64(i), // Timestamp sequencial
 			V:  fmt.Sprintf("%.2f", volume),  // Volume
 			O:  fmt.Sprintf("%.2f", open),    // Open

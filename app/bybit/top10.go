@@ -23,7 +23,7 @@ func GetTop10() ([]BybitTop10Data, error) {
 
 	result, err := utils.Request(
 		getUrl("/de/cht/api/searchSymbolRecommend/list"),
-		defaultHeaders,
+		DefaultHeaders,
 	)
 
 	if err != nil {

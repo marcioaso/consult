@@ -2,7 +2,7 @@ package bybit
 
 import "fmt"
 
-var defaultHeaders = map[string]string{
+var DefaultHeaders = map[string]string{
 	"Accept":             "application/json",
 	"Content-Type":       "application/json",
 	"Sec-CH-UA":          `"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"`,

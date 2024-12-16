@@ -28,12 +28,14 @@ type KLineAnalysisData struct {
 }
 
 type KLinePotential struct {
-	Initial    float64 `json:"initial"`
-	Final      float64 `json:"final"`
-	Bought     float64 `json:"bought"`
-	Price      float64 `json:"-"`
-	Variation  float64 `json:"variation"`
-	Efficiency float64 `json:"efficiency"`
+	Initial    float64                `json:"initial"`
+	Final      float64                `json:"final"`
+	Bought     float64                `json:"bought"`
+	Price      float64                `json:"-"`
+	Variation  float64                `json:"variation"`
+	WithoutBot float64                `json:"without_bot"`
+	Efficiency float64                `json:"efficiency"`
+	Losses     []ActionRecommendation `json:"losses"`
 }
 
 type KLineBacktestResponse struct {

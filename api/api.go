@@ -46,6 +46,7 @@ func configureHandlers(e *echo.Echo) {
 	e.GET("/bybit/kline", bybitapi.KlineHandler)
 	e.GET("/bybit/analysis", bybitapi.AnalysisHandler)
 	e.GET("/bybit/backtest", bybitapi.BacktestHandler)
+	e.GET("/bybit/populate", bybitapi.PopulateHandler)
 	e.GET("/analysis", func(c echo.Context) error {
 		return c.File("templates/analysis.html")
 	})

@@ -18,7 +18,7 @@ func GetKLine(ticker, interval, to string, limit int) (*model.KLineResponse, err
 		),
 	)
 
-	result, err := utils.Request(url, defaultHeaders)
+	result, err := utils.Request(url, DefaultHeaders)
 	if err != nil {
 		return nil, err
 	}

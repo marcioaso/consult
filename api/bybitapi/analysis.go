@@ -2,7 +2,6 @@ package bybitapi
 
 import (
 	"fmt"
-	"math"
 	"net/http"
 	"strconv"
 	"time"
@@ -79,7 +78,6 @@ func AnalysisHandler(c echo.Context) error {
 	recommendations := make([]model.ActionRecommendation, 0)
 	analysisData := make([]model.KLineAnalysisData, 0)
 
-	lastStopLoss := 0.0
 	for i, slice := range mtx {
 		j := i + gap
 		start := slice[0]
@@ -91,32 +89,6 @@ func AnalysisHandler(c echo.Context) error {
 		history := analysis[start:end]
 		analysis[j].History = history
 		pkg.EnhanceAverageData(&analysis[j], previousItem)
-
-		if i > 1 {
-			stopLoss := analysis[i-1].KLine.Low
-			risk := math.Abs(analysis[j-1].KLine.Low - analysis[j].KLine.Close)
-			recommendation := model.ActionRecommendation{
-				Datetime: analysis[j].KLine.Datetime,
-				StopLoss: stopLoss,
-				Risk:     risk,
-			}
-			if lastStopLoss < stopLoss {
-				recommendation.StopLoss = stopLoss
-				lastStopLoss = stopLoss
-			}
-
-			bybit.GenerateRecommendation(&recommendation, history)
-			if !(bybit.CurrentRecommendation.Type == "" && recommendation.Type == "sell") &&
-				recommendation.Type != "wait" &&
-				bybit.CurrentRecommendation.Type != recommendation.Type {
-				recommendations = append(recommendations, recommendation)
-				bybit.CurrentRecommendation = recommendation
-				bybit.LastRecommendedKline = analysis[j]
-				if recommendation.Type == "sell" {
-					lastStopLoss = 0.0
-				}
-			}
-		}
 	}
 
 	response := model.KLineAnalysisResponse{

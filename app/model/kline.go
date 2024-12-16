@@ -32,6 +32,7 @@ type KLineResponse struct {
 }
 
 type KLineData struct {
+	Id             int64   `json:"id,omitempty"`
 	Datetime       string  `json:"date_time"`
 	Timestamp      int64   `json:"timestamp"`
 	Symbol         string  `json:"symbol"`
